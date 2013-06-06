@@ -1,8 +1,8 @@
 function fnSendTopic(){
     var topic1 = document.getElementById("topic1").value;
-    var topic2 = document.getElementById("topic1").value;
-    var topic3 = document.getElementById("topic1").value;
-    var topic4 = document.getElementById("topic1").value;
+    var topic2 = document.getElementById("topic2").value;
+    var topic3 = document.getElementById("topic3").value;
+    var topic4 = document.getElementById("topic4").value;
     var xmlhttp = getXMLHttpRequestObject();
     var url = "getTweets?topic1=" + topic1 + "&topic2=" + topic2 + "&topic3=" + topic3 + "&topic4=" + topic4;
     xmlhttp.open("POST",url, true);
