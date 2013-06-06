@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="./js/d3.js"></script>
+<script src="./js/d3.layout.cloud.js"></script>
+<script src="./js/util.js"></script>
+<head>
+    <style>
+        input[type=text]{
+            width:150px;
+            border: solid 1px darkgrey;
+            color: Sienna;
+        }
+    </style>
+</head>
+<body onload='init()'>
+<table style="width:100%;margin:10px 0px;border:1px solid skyblue" cellspacing=0px cellpadding=10px>
+    <tr>
+        <td width='20%' style="border-right: 1px solid skyblue">
+            <span style="padding-right:20px">Topic1 :</span> <input type="text" name="topic1" id="topic1">
+        </td>
+        <td style="border-right: 1px solid skyblue">
+            <span style="padding-right:20px">Topic2 :</span> <input type="text" name="topic2" id="topic2">
+        </td>
+        <td style="border-right: 1px solid skyblue">
+            <span style="padding-right:20px">Topic3 :</span> <input type="text" name="topic3" id="topic3">
+        </td>
+        <td style="border-right: 1px solid skyblue">
+            <span style="padding-right:20px">Topic4 :</span> <input type="text" name="topic4" id="topic4">
+        </td>
+        <td align="center">
+            <input type="button" value="Analyze" style="background-color:skyblue;border:1px outset buttonface; padding:3px;font-weight:bold" onclick="fnSendTopic()">
+        </td>
+    </tr>
+</table>
+<table width='100%' border=0 style='border:1px solid black' cellpadding=0 cellspacing=0>
+	<tr style='border:1px solid black; background-color:lightblue'>
+		<td align="center" style="border-right:1px solid black; border-bottom:1px solid black"><br><br>Trending for India<br><br></td>
+		<td align="center" style="border-bottom:1px solid black"><br>Trending for London<br><br</td>
+	</tr>
+	<tr>
+		<td align="center" width="50%" style="border-right:1px solid black"><br><br><div id='india'></div></td>
+		<td align="center"><div id='london'><br><br></div></td>
+	</tr>
+</table>
+<script>
+  var fill = d3.scale.category20();
+  var data_india = new Array();
+  var data_london = new Array();	
+  x = d3.layout.cloud().size([300, 300])
+      .words(data_india.map(function(d) {
+        return {text: d, size: 10 + Math.random() * 90};
+      }))
+      .rotate(function() { return ~~(Math.random() * 2) * 90; })
+      .font("Impact")
+      .fontSize(function(d) { return d.size; })
+      .on("end", drawIndia);
+      //x.start();
+      
+   x1 = d3.layout.cloud().size([300, 300])
+      .words(data_london.map(function(d) {
+        return {text: d, size: 10 + Math.random() * 90};
+      }))
+      .rotate(function() { return ~~(Math.random() * 2) * 90; })
+      .font("Impact")
+      .fontSize(function(d) { return d.size; })
+      .on("end", drawLondon);
+      //x.start();
+
+  function drawIndia(words) {
+  	d3.select("#india").html("");
+    d3.select("#india").append("svg")
+        .attr("width", 300)
+        .attr("height", 300)
+      .append("g")
+        .attr("transform", "translate(150,150)")
+      .selectAll("text")
+        .data(words)
+      .enter().append("text")
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) { return fill(i); })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; });
+  }
+  
+  function drawLondon(words) {
+  	d3.select("#london").html("");
+    d3.select("#london").append("svg")
+        .attr("width", 300)
+        .attr("height", 300)
+      .append("g")
+        .attr("transform", "translate(150,150)")
+      .selectAll("text")
+        .data(words)
+      .enter().append("text")
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) { return fill(i); })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; });
+  }
+
+function fnRedraw(data){
+	//data = ["Ramkumar", "Java", "BigData", "Hadoop", "Cassandra", "NoSql"];
+	//alert(data);
+	/*x.words(data.map(function(d) {
+		    return {text: d, size: 10 + Math.random() * 90};
+		  }))
+	x.start();	*/
+}
+
+function init(){
+	var ws = new WebSocket("ws://localhost:8080");
+	ws.onopen = function(){
+		alert("Connected");
+	}	
+	
+	ws.onmessage = function (evt){
+		var tweetData = evt.data;
+		var tweetDetails = tweetData.split("-",2);
+		if(tweetDetails.length > 1 && tweetDetails[1] != null && tweetDetails[1] != ""){
+			//alert(tweetDetails[0] + "/n/n" + tweetData);
+			if(tweetDetails[0] == "india"){
+				data_india.push(tweetDetails[1]);
+				x.words(data_india.map(function(d) {
+					return {text: d, size: 10 + Math.random() * 90};
+			  	}));
+				x.start();	
+			}else if(tweetDetails[0] == "london"){
+				data_london.push(tweetDetails[1]);
+				x1.words(data_london.map(function(d) {
+					return {text: d, size: 10 + Math.random() * 90};
+			  	}));
+				x1.start();	
+			}
+			
+		}
+	}
+}
+</script>
+</body>
